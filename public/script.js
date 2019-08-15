@@ -5,31 +5,36 @@ window.onload = function () {
     canvas.onmousedown = startDrawing;
     canvas.onmouseup = stopDrawing;
     canvas.onmouseout = stopDrawing;
-    canvas.onmousemove = draw;
+    canvas.onmousemove = drawing;
 
+    socket.on('mouse', newDrawing);
     let isDrawing;
     
-
-    function startDrawing(e) {
-        // Начинаем рисовать
+    function startDrawing(e) {       
         isDrawing = true;
-        
-        // Создаем новый путь (с текущим цветом и толщиной линии) 
         context.beginPath();
-        
-        // Нажатием левой кнопки мыши помещаем "кисть" на холст
         context.moveTo(e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetTop);
+        
     }
+    function newDrawing(data) {
+        let x = data.x;
+        let y = data.y;
+        context.lineTo(x, y);
+        context.stroke();
 
-    function draw(e) {
+    }
+    function drawing(e) {
         if (isDrawing == true){
-            // Определяем текущие координаты указателя мыши
             let x = e.pageX - canvas.offsetLeft;
             let y = e.pageY - canvas.offsetTop;
-            
-            // Рисуем линию до новой координаты
             context.lineTo(x, y);
             context.stroke();
+
+            let data = {
+                x: x,
+                y: y
+            }
+            socket.emit('mouse', data);
         }
     }
 
@@ -37,3 +42,4 @@ window.onload = function () {
         isDrawing = false;	
     }
 }
+
