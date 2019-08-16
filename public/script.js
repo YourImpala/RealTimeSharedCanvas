@@ -1,45 +1,41 @@
-window.onload = function () {
-    const canvas = document.getElementById('myCanvas');
-    const context = canvas.getContext('2d');
+function setup(){
+    createCanvas(900, 600);
 
-    canvas.onmousedown = startDrawing;
-    canvas.onmouseup = stopDrawing;
-    canvas.onmouseout = stopDrawing;
-    canvas.onmousemove = drawing;
-
-    socket.on('mouse', newDrawing);
-    let isDrawing;
-    
-    function startDrawing(e) {       
-        isDrawing = true;
-        context.beginPath();
-        context.moveTo(e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetTop);
-        
-    }
-    function newDrawing(data) {
-        let x = data.x;
-        let y = data.y;
-        context.lineTo(x, y);
-        context.stroke();
-
-    }
-    function drawing(e) {
-        if (isDrawing == true){
-            let x = e.pageX - canvas.offsetLeft;
-            let y = e.pageY - canvas.offsetTop;
-            context.lineTo(x, y);
-            context.stroke();
-
-            let data = {
-                x: x,
-                y: y
-            }
-            socket.emit('mouse', data);
-        }
-    }
-
-    function stopDrawing() {
-        isDrawing = false;	
-    }
+    //receives coordinates from the server
+    socket.on('data', anotherClientDrawing);
 }
+
+//draws on this client
+function draw() {
+    if (mouseIsPressed && mouseButton === LEFT) {
+        let color1 = Math.floor(Math.random() * 256);
+        let color2 = Math.floor(Math.random() * 256);
+        let color3 = Math.floor(Math.random() * 256);
+        
+        fill(color1, color2, color3);
+        ellipse(mouseX, mouseY, 80, 80);
+
+        let data = {
+            x: mouseX,
+            y: mouseY
+        }
+        //send coordinates to server
+        socket.emit('data', data);
+       
+    }
+  
+}
+
+//draws on another client
+function anotherClientDrawing(data) { 
+    let color1 = Math.floor(Math.random() * 256);
+    let color2 = Math.floor(Math.random() * 256);
+    let color3 = Math.floor(Math.random() * 256);
+    
+    fill(color1, color2, color3);
+    ellipse(data.x, data.y, 80, 80);
+}
+
+
+
 
